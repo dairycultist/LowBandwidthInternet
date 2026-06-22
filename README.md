@@ -8,7 +8,7 @@ The `.sim` ("Small IMage") format downsamples (by a factor of 2) a source image 
 
 - The image's width as a little-endian 16-bit unsigned integer (does not store the height; that can be derived)
 - The downsampling n value as a 8-bit unsigned integer
-- 5 unused bytes
+- 5 reserved unused bytes (probably to store compression format)
 - The data of the downsampled image as a block
 - The three blocks corresponding to the data that would upsample that image once
 - The three blocks corresponding to the data that would upsample the upsample once

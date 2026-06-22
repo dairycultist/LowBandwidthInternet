@@ -33,7 +33,8 @@ const { intToRGBA } = require("@jimp/utils");
         const h = image.bitmap.height;
         const buf = Buffer.alloc(8 + w * h);
 
-        await image.brightness(1.1).posterize(8).dither();
+        // image preprocessing (TODO palettize image with require('quantize'), add palette lookup to buffer)
+        await image.brightness(0.9).contrast(0.05).dither();
 
         // store width as a little-endian 16-bit unsigned integer
         buf[0] = w & 0xFF;
