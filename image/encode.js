@@ -12,14 +12,12 @@ const Jimp = require("@jimp/core").createJimp({
   ]
 });
 
-const { intToRGBA, rgbaToInt } = require("@jimp/utils");
-
-// the decode script will have an option to stop a percentage of the way through decoding to see what it looks like
+const { intToRGBA } = require("@jimp/utils");
 
 (async () => {
 
     const in_path = process.argv[2];
-    const out_path = process.argv[3] || "output.sim";
+    const out_path = process.argv[3] || "encoded.sim";
 
     try {
         const image = await Jimp.read(in_path);
@@ -38,22 +36,10 @@ const { intToRGBA, rgbaToInt } = require("@jimp/utils");
 
                     const rgb = intToRGBA(image.getPixelColor(x, y));
 
-                    buf[x + y * w] = ((rgb.r >> 6) << 6) | ((rgb.g >> 5) << 2) | (rgb.b >> 6);
-
-                    // test what image will look like once decoded
-                    let r = rgb.r >> 6;
-                    let g = rgb.g >> 5;
-                    let b = rgb.b >> 6;
-                    r = r & 0x01 ? ((r << 6) | 0b00111111) : (r << 6);
-                    g = g & 0x01 ? ((g << 5) | 0b00011111) : (g << 5);
-                    b = b & 0x01 ? ((b << 6) | 0b00111111) : (b << 6);
-                    image.setPixelColor(rgbaToInt(r, g, b, 255), x, y);
+                    buf[x + y * w] = ((rgb.r >> 5) << 5) | ((rgb.g >> 5) << 2) | (rgb.b >> 6);
                 }
             }
         }
-
-        // test what image will look like once decoded
-        await image.write("temp.png");
 
         fs.writeFileSync(out_path, buf);
 

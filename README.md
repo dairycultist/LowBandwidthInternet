@@ -4,20 +4,38 @@ A technical pet-project attempting to recreate systems necessary for a 'workable
 
 ## /image/
 
-The `.sim` ("Small IMage") format downsamples (by a factor of 2) the image n times, then stores (in order):
+The `.sim` ("Small IMage") format downsamples (by a factor of 2) a source image n times, then stores (in order):
+
 - The data of the downsampled image as a block
 - The three blocks corresponding to the data that would upsample that image once
 - The three blocks corresponding to the data that would upsample the upsample once
 - etc
+
 All the data of the original image is stored, but interlaced. This interlacing means
-you need less pixel data to see a "full" image (that gets refined as you get more
+you need less pixel data to see a "full" image (that gets refined as you receive more
 information). Compression is possible but only within blocks. Reconstructing the
-image should be done in such a way that "gaps" between (not within) blocks are filled
-by what data currently is available.
+image should be done in such a way that pixel "gaps" between (not within) blocks are
+filled by what data currently is available.
+
+> [!NOTE]  
+> This encoder/decoder currently only supports downsample n values of 1, and forces an image
+> width of 256, scaling as necessary. Both these shortcomings will be solved through the
+> introduction of metadata!
 
 ```
-node image/encode.js [image file in] [image file out, default: ./output.sim]
+node image/encode.js [in.png/jpg] [out.sim, default: ./encoded.sim]
+node image/decode.js [in.sim] [out.png/jpg, default: ./decoded.png] [stopvalue, default: 1.0]
 ```
+
+`stopvalue` determines how much data `decode` should process before writing to the output file.
+Values less than 1.0 cause the program to stop before all the data has been processed, allowing
+you to simulate a transmission failure and see how it effects the final image.
+
+There's no transparency and I don't plan on supporting it.
+
+## /markup/
+
+The `.smu` ("Small MarkUp") format.
 
 ## References
 
