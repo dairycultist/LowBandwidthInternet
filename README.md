@@ -2,8 +2,10 @@
 
 A technical pet-project attempting to recreate systems necessary for a 'workable' internet while minimizing required bandwidth.
 
+`.sim` means "Small IMage"
+
 ```
-node image/encode.js [image file in] [image file out, default: ./output.png]
+node image/encode.js [image file in] [image file out, default: ./output.sim]
 ```
 
 ## References

@@ -1,3 +1,5 @@
+const fs = require("fs");
+
 const Jimp = require("@jimp/core").createJimp({
   formats: [
     require("@jimp/js-png").default,
@@ -5,34 +7,64 @@ const Jimp = require("@jimp/core").createJimp({
   ],
   plugins: [
     require("@jimp/plugin-resize").methods,
-    require("@jimp/plugin-color").methods
+    require("@jimp/plugin-color").methods,
+    require("@jimp/plugin-dither").methods
   ]
 });
 
-// format works like this: pixels are stored (and subsequently drawn) interspaced
-// consider a 4x4 pixel image, this is how it would be loaded
-// AACC ABCD ABCD ABCD
-// AACC ABCD EBGD EFGH
-// IIKK IJKL IJKL IJKL
-// IIKK IJKL MJOL MNOP
-// I might consider breaking each of these above pixels into groups of 2x2 pixels themselves for even faster loading of a usable image, but whatever
-// this allows you to, say, only have 25% of the image data and still see a "full" image (that gets refined as you get more information)
+const { intToRGBA, rgbaToInt } = require("@jimp/utils");
+
+// format: consider a 4x4 pixel image
+// ABCD
+// EFGH
+// IJKL
+// MNOP
+// stored: ACIK BDJL EGMO FHNP
+// this interspacing (this example is just 1-deep) means you need less pixel data
+// (here, 25%) to see a "full" image (that gets refined as you get more information)
+
 // the decode script will have an option to stop a percentage of the way through decoding to see what it looks like
 
 (async () => {
 
-    const path = process.argv[2];
+    const in_path = process.argv[2];
+    const out_path = process.argv[3] || "output.sim";
 
     try {
-        const image = await Jimp.read(path);
+        const image = await Jimp.read(in_path);
 
         await image
-            .resize({ w: 256 })
-            .contrast(0.1) // adds 10%
-            .brightness(1.1) // sets to 110%
-            .posterize(4); // 6 bit
+            .resize({ w: 256 }).brightness(1.1).posterize(8).dither();
 
-        await image.write("output.png");
+        const w = 256;
+        const h = image.bitmap.height;
+        const buf = Buffer.alloc(w * h);
+
+        for (let i = 0; i < 4; i++) {
+
+            for (let y = i / 2; y < h; y += 2) {
+                for (let x = i % 2; x < w; x += 2) {
+
+                    const rgb = intToRGBA(image.getPixelColor(x, y));
+
+                    buf[x + y * w] = ((rgb.r >> 6) << 6) | ((rgb.g >> 5) << 2) | (rgb.b >> 6);
+
+                    // test what image will look like once decoded
+                    let r = rgb.r >> 6;
+                    let g = rgb.g >> 5;
+                    let b = rgb.b >> 6;
+                    r = r & 0x01 ? ((r << 6) | 0b00111111) : (r << 6);
+                    g = g & 0x01 ? ((g << 5) | 0b00011111) : (g << 5);
+                    b = b & 0x01 ? ((b << 6) | 0b00111111) : (b << 6);
+                    image.setPixelColor(rgbaToInt(r, g, b, 255), x, y);
+                }
+            }
+        }
+
+        // test what image will look like once decoded
+        await image.write("temp.png");
+
+        fs.writeFileSync(out_path, buf);
 
     } catch (error) {
         console.error("An error occurred while processing the image:", error);
