@@ -20,10 +20,6 @@ information). Compression is possible but only within blocks. Reconstructing the
 image should be done in such a way that pixel "gaps" between (not within) blocks are
 filled by what data currently is available.
 
-> [!NOTE]
-> This encoder/decoder currently only supports downsample n values of 1. This shortcoming
-> will be solved through a metadata value for n.
-
 ```
 node image/encode.js [in.png/jpg] [out.sim, default: ./encoded.sim] [nvalue]
 node image/decode.js [in.sim] [out.png/jpg, default: ./decoded.png] [stopvalue, default: 1.0]
