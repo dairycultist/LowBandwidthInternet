@@ -22,8 +22,8 @@ const { rgbaToInt } = require("@jimp/utils");
     try {
         const buf = fs.readFileSync(in_path);
 
-        const w = 256;
-        const h = buf.length / 256;
+        const w = buf[0] | (buf[1] << 8);
+        const h = (-2 + buf.length) / w;
 
         const image = new Jimp({ width: w, height: h, color: 0x000000FF });
 
@@ -34,7 +34,7 @@ const { rgbaToInt } = require("@jimp/utils");
             for (let y = Math.floor(i / 2); y < h; y += 2) {
                 for (let x = i % 2; x < w; x += 2) {
 
-                    let c = buf[x + y * w];
+                    let c = buf[2 + x + y * w];
                     let r = c >> 5;
                     let g = (c >> 2) & 0b00000111;
                     let b = c & 0b00000011;

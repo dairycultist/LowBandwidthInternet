@@ -22,12 +22,20 @@ const { intToRGBA } = require("@jimp/utils");
     try {
         const image = await Jimp.read(in_path);
 
-        await image
-            .resize({ w: 256 }).brightness(1.1).posterize(8).dither();
+        await image.brightness(1.1).posterize(8).dither();
 
-        const w = 256;
+        const w = image.bitmap.width;
         const h = image.bitmap.height;
-        const buf = Buffer.alloc(w * h);
+        const buf = Buffer.alloc(2 + w * h);
+
+        if (w != w & 0xFF) {
+            console.error("Image is wider than can be stored in a 16-bit unsigned integer. This format is supposed to be lightweight; what are you doing?");
+            return;
+        }
+
+        // store length as a little-endian 16-bit unsigned integer
+        buf[0] = w & 0xFF;
+        buf[1] = (w >> 8) & 0xFF;
 
         for (let i = 0; i < 4; i++) {
 
@@ -36,7 +44,7 @@ const { intToRGBA } = require("@jimp/utils");
 
                     const rgb = intToRGBA(image.getPixelColor(x, y));
 
-                    buf[x + y * w] = ((rgb.r >> 5) << 5) | ((rgb.g >> 5) << 2) | (rgb.b >> 6);
+                    buf[2 + x + y * w] = ((rgb.r >> 5) << 5) | ((rgb.g >> 5) << 2) | (rgb.b >> 6);
                 }
             }
         }

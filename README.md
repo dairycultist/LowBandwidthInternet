@@ -6,6 +6,7 @@ A technical pet-project attempting to recreate systems necessary for a 'workable
 
 The `.sim` ("Small IMage") format downsamples (by a factor of 2) a source image n times, then stores (in order):
 
+- The image's width as a little-endian 16-bit unsigned integer (does not store the height; that can be derived)
 - The data of the downsampled image as a block
 - The three blocks corresponding to the data that would upsample that image once
 - The three blocks corresponding to the data that would upsample the upsample once
@@ -17,10 +18,9 @@ information). Compression is possible but only within blocks. Reconstructing the
 image should be done in such a way that pixel "gaps" between (not within) blocks are
 filled by what data currently is available.
 
-> [!NOTE]  
-> This encoder/decoder currently only supports downsample n values of 1, and forces an image
-> width of 256, scaling as necessary. Both these shortcomings will be solved through the
-> introduction of metadata!
+> [!NOTE]
+> This encoder/decoder currently only supports downsample n values of 1. This shortcoming
+> will be solved through a metadata value for n.
 
 ```
 node image/encode.js [in.png/jpg] [out.sim, default: ./encoded.sim]
