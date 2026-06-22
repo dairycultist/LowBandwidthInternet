@@ -14,15 +14,6 @@ const Jimp = require("@jimp/core").createJimp({
 
 const { intToRGBA, rgbaToInt } = require("@jimp/utils");
 
-// format: consider a 4x4 pixel image
-// ABCD
-// EFGH
-// IJKL
-// MNOP
-// stored: ACIK BDJL EGMO FHNP
-// this interspacing (this example is just 1-deep) means you need less pixel data
-// (here, 25%) to see a "full" image (that gets refined as you get more information)
-
 // the decode script will have an option to stop a percentage of the way through decoding to see what it looks like
 
 (async () => {
