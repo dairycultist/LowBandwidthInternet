@@ -96,7 +96,9 @@ function draw_pixel(x, y, spacing, buf, w, h, image) {
     g = g & 0x01 ? ((g << 5) | 0b00011111) : (g << 5);
     b = b & 0x01 ? ((b << 6) | 0b00111111) : (b << 6);
 
-    image.scan(x, y, 1 - x + (x / spacing + 1) * spacing, 1 - y + (y / spacing + 1) * spacing, function (x, y, offset) {
+    const mod = (n, m) => ((n % m) + m) % m;
+
+    image.scan(x, y, mod(x - 1, spacing) + 1, mod(y - 1, spacing) + 1, function (x, y, offset) {
         image.setPixelColor(rgbaToInt(r, g, b, 255), x, y);
     });
 }
