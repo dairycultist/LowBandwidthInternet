@@ -27,9 +27,11 @@ const { rgbaToInt } = require("@jimp/utils");
 
         const image = new Jimp({ width: w, height: h, color: 0x000000FF });
 
+        let pixels_done = 0;
+
         for (let i = 0; i < 4; i++) {
 
-            for (let y = i / 2; y < h; y += 2) {
+            for (let y = Math.floor(i / 2); y < h; y += 2) {
                 for (let x = i % 2; x < w; x += 2) {
 
                     let c = buf[x + y * w];
@@ -41,8 +43,24 @@ const { rgbaToInt } = require("@jimp/utils");
                     b = b & 0x01 ? ((b << 6) | 0b00111111) : (b << 6);
 
                     image.setPixelColor(rgbaToInt(r, g, b, 255), x, y);
+                    if (i == 0) {
+                        image.setPixelColor(rgbaToInt(r, g, b, 255), x + 1, y);
+                        image.setPixelColor(rgbaToInt(r, g, b, 255), x + 1, y + 1);
+                    }
+                    if (i == 0 || i == 1)
+                        image.setPixelColor(rgbaToInt(r, g, b, 255), x, y + 1);
+                    pixels_done++;
+
+                    if (pixels_done / (1.0 * w * h) > stopvalue)
+                        break;
                 }
+
+                if (pixels_done / (1.0 * w * h) > stopvalue)
+                    break;
             }
+
+            if (pixels_done / (1.0 * w * h) > stopvalue)
+                break;
         }
 
         await image.write(out_path);

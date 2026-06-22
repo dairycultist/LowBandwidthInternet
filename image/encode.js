@@ -31,7 +31,7 @@ const { intToRGBA } = require("@jimp/utils");
 
         for (let i = 0; i < 4; i++) {
 
-            for (let y = i / 2; y < h; y += 2) {
+            for (let y = Math.floor(i / 2); y < h; y += 2) {
                 for (let x = i % 2; x < w; x += 2) {
 
                     const rgb = intToRGBA(image.getPixelColor(x, y));
