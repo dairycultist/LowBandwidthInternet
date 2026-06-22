@@ -7,6 +7,8 @@ A technical pet-project attempting to recreate systems necessary for a 'workable
 The `.sim` ("Small IMage") format downsamples (by a factor of 2) a source image n times, then stores (in order):
 
 - The image's width as a little-endian 16-bit unsigned integer (does not store the height; that can be derived)
+- The downsampling n value as a 8-bit unsigned integer
+- 5 unused bytes
 - The data of the downsampled image as a block
 - The three blocks corresponding to the data that would upsample that image once
 - The three blocks corresponding to the data that would upsample the upsample once
@@ -23,7 +25,7 @@ filled by what data currently is available.
 > will be solved through a metadata value for n.
 
 ```
-node image/encode.js [in.png/jpg] [out.sim, default: ./encoded.sim]
+node image/encode.js [in.png/jpg] [out.sim, default: ./encoded.sim] [nvalue]
 node image/decode.js [in.sim] [out.png/jpg, default: ./decoded.png] [stopvalue, default: 1.0]
 ```
 
