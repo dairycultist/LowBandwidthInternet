@@ -37,17 +37,7 @@ const { intToRGBA } = require("@jimp/utils");
         buf[0] = w & 0xFF;
         buf[1] = (w >> 8) & 0xFF;
 
-        for (let i = 0; i < 4; i++) {
-
-            for (let y = Math.floor(i / 2); y < h; y += 2) {
-                for (let x = i % 2; x < w; x += 2) {
-
-                    const rgb = intToRGBA(image.getPixelColor(x, y));
-
-                    buf[2 + x + y * w] = ((rgb.r >> 5) << 5) | ((rgb.g >> 5) << 2) | (rgb.b >> 6);
-                }
-            }
-        }
+        recursive_downsample_encode(image, w, h, buf, 1);
 
         fs.writeFileSync(out_path, buf);
 
@@ -56,3 +46,42 @@ const { intToRGBA } = require("@jimp/utils");
     }
 
 })();
+
+function recursive_downsample_encode(image, w, h, buf, n, curr_n = 0) {
+
+    const spacing = Math.pow(2, curr_n);
+
+    // store the downsampled data
+    if (curr_n == n) {
+
+        for (let y = 0; y < h; y += spacing) {
+            for (let x = 0; x < w; x += spacing) {
+
+                const rgb = intToRGBA(image.getPixelColor(x, y));
+
+                buf[2 + x + y * w] = ((rgb.r >> 5) << 5) | ((rgb.g >> 5) << 2) | (rgb.b >> 6);
+            }
+        }
+
+    } else {
+
+        recursive_downsample_encode(image, w, h, buf, n, curr_n + 1);
+    }
+
+    // no upsampling data when we have nothing to upsample
+    if (curr_n == 0)
+        return;
+
+    // store the upsampling data
+    for (let i = 1; i < 4; i++) {
+
+        for (let y = Math.floor(i / 2) * (spacing / 2); y < h; y += spacing) {
+            for (let x = (i % 2) * (spacing / 2); x < w; x += spacing) {
+
+                const rgb = intToRGBA(image.getPixelColor(x, y));
+
+                buf[2 + x + y * w] = ((rgb.r >> 5) << 5) | ((rgb.g >> 5) << 2) | (rgb.b >> 6);
+            }
+        }
+    }
+}
