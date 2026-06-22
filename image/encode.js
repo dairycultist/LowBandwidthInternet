@@ -1,6 +1,4 @@
-const { createJimp } = require("@jimp/core");
-
-const Jimp = createJimp({
+const Jimp = require("@jimp/core").createJimp({
   formats: [
     require("@jimp/js-png").default,
     require("@jimp/js-jpeg").default
@@ -30,7 +28,8 @@ const Jimp = createJimp({
 
         await image
             .resize({ w: 256 })
-            .contrast(0.2) // adds 20%
+            .contrast(0.1) // adds 10%
+            .brightness(1.1) // sets to 110%
             .posterize(4); // 6 bit
 
         await image.write("output.png");
